@@ -1,394 +1,362 @@
-<html class="light" lang="vi"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Phân Tích Nguồn Với Chỉ Số Khí &amp; Bụi Mịn Trung Bình</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Phân Tích Cụm Dữ Liệu</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
                         "primary": "#137fec",
+                        "primary-dark": "#0b5ed7",
+                        "quality-good": "#10b981",      // Xanh lá
+                        "quality-moderate": "#f59e0b",  // Vàng
+                        "quality-poor": "#ef4444",      // Đỏ
                         "background-light": "#f8fafc",
                         "background-dark": "#0f172a",
-                        "quality-good": "#10b981",
-                        "quality-moderate": "#f59e0b",
-                        "quality-poor": "#ef4444",
                         "sidebar-bg": "#1e293b",
                     },
                     fontFamily: {
                         "display": ["Space Grotesk"]
                     },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
                 },
             },
         }
     </script>
-<style type="text/tailwindcss">
+    <style type="text/tailwindcss">
         @layer utilities {
-            .no-scrollbar::-webkit-scrollbar {
-                display: none;
-            }
-            .no-scrollbar {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-            }
+            .no-scrollbar::-webkit-scrollbar { display: none; }
             .analysis-card {
-                @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-5 flex flex-col gap-5;
-            }
-            .source-bar-bg {
-                @apply w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden;
-            }
-            .source-bar-fill {
-                @apply h-full bg-primary rounded-full;
+                @apply bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 p-6 flex flex-col gap-6 h-full hover:shadow-xl hover:shadow-slate-200/60 dark:hover:shadow-slate-900/60 transition-all duration-300;
             }
             .metric-box {
-                @apply flex flex-col p-2 bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-lg;
+                @apply flex flex-col p-3 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-xl items-center justify-center text-center transition-all duration-200 hover:scale-105 hover:shadow-md;
+            }
+            .cluster-btn {
+                @apply px-4 py-3 rounded-xl text-sm font-bold border transition-all duration-300 text-left flex justify-between items-center hover:scale-[1.02];
+            }
+            .cluster-btn.active {
+                @apply bg-gradient-to-r from-primary to-blue-600 text-white border-primary shadow-xl shadow-primary/40 scale-105;
+            }
+            .cluster-btn.inactive {
+                @apply bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary/50 hover:text-primary hover:shadow-md;
             }
         }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-hidden h-screen flex">
-<aside class="w-64 bg-white dark:bg-sidebar-bg flex-none flex flex-col border-r border-slate-200 dark:border-slate-800 transition-colors duration-200">
-    <div class="p-5 flex items-center gap-3">
-        <div class="bg-primary rounded-lg p-1.5 text-white flex items-center justify-center"><span class="material-symbols-outlined text-2xl">air</span></div>
-        <span class="text-slate-800 dark:text-white font-bold text-lg tracking-tight uppercase">Air Monitor</span>
-    </div>
     
-    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
-        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="main.html">
-            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">home</span>
-            <span class="font-medium">Tổng quan</span>
-        </a>
-        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="forecast.html">
-            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">partly_cloudy_day</span>
-            <span class="font-medium">Dự báo</span>
-        </a>
-        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all text-sm" href="#">
-            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">analytics</span>
-            <span class="font-medium">Phân tích</span>
-        </a>
-        
-        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="history.html">
-            <span class="material-symbols-outlined text-xl">history</span>
-            <span>Lịch sử trạm</span>
-        </a>
-    </nav>
-</aside>
-
-<div class="flex-1 flex flex-col overflow-hidden">
-<header class="flex-none z-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 py-4">
-<div>
-<h1 class="text-2xl font-bold leading-tight">Phân Tích Nguồn Với Chỉ Số Khí &amp; Bụi Mịn Trung Bình</h1>
-<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Hệ thống giám sát phân tích 3 trạm đo quan trắc</p>
-</div>
-<div class="flex items-center gap-4">
-<div class="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
-<span class="material-symbols-outlined text-slate-500 text-sm">calendar_today</span>
-<span class="text-xs font-semibold">Hôm nay, 21/05/2024</span>
-</div>
-</div>
-</header>
-<main class="flex-1 overflow-y-auto p-8 no-scrollbar">
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-<div class="analysis-card">
-<div class="flex justify-between items-start">
-<div>
-<h2 class="text-xl font-bold text-slate-900 dark:text-white">Trạm 01</h2>
-<p class="text-xs text-slate-500 font-medium">Khu vực Sảnh Chính</p>
-</div>
-<span class="material-symbols-outlined text-primary">location_on</span>
-</div>
-<div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Chỉ số trung bình từ nguồn phát thải</p>
-<div class="grid grid-cols-4 gap-2">
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">PM1.0</span>
-<span class="text-lg font-bold">12</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">PM2.5</span>
-<span class="text-lg font-bold">18</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">PM10</span>
-<span class="text-lg font-bold">35</span>
-</div>
-<div class="metric-box border-l-2 border-l-primary">
-<span class="text-[9px] font-bold text-primary uppercase">TVOC</span>
-<span class="text-lg font-bold">0.12</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">CO</span>
-<span class="text-lg font-bold">0.8</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">CO2</span>
-<span class="text-lg font-bold">415</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">NO2</span>
-<span class="text-lg font-bold">0.03</span>
-</div>
-</div>
-<p class="text-[9px] text-slate-500 mt-3 leading-tight italic">Các giá trị trên thể hiện mức độ đóng góp trung bình từ các nguồn ô nhiễm được phân tích</p>
-</div>
-<div>
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Nguồn ô nhiễm ảnh hưởng</p>
-<div class="space-y-4">
-<div class="space-y-1.5">
-<div class="flex justify-between text-xs font-bold uppercase">
-<span>Giao thông</span>
-<span>45%</span>
-</div>
-<div class="source-bar-bg"><div class="source-bar-fill" style="width: 45%"></div></div>
-</div>
-<div class="space-y-1.5">
-<div class="flex justify-between text-xs font-bold uppercase">
-<span>Công nghiệp</span>
-<span>20%</span>
-</div>
-<div class="source-bar-bg"><div class="source-bar-fill opacity-70" style="width: 20%"></div></div>
-</div>
-<div class="space-y-1.5">
-<div class="flex justify-between text-xs font-bold uppercase">
-<span>Bụi đường</span>
-<span>25%</span>
-</div>
-<div class="source-bar-bg"><div class="source-bar-fill opacity-50" style="width: 25%"></div></div>
-</div>
-</div>
-</div>
-<div class="mt-auto">
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tóm tắt nguồn chính</p>
-<div class="overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800">
-<table class="w-full text-left text-xs">
-<thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 uppercase font-bold">
-<tr>
-<th class="px-3 py-2">Nguồn</th>
-<th class="px-3 py-2">Tác động</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-<tr>
-<td class="px-3 py-2 font-medium">Xe máy/Ô tô</td>
-<td class="px-3 py-2 text-slate-500 italic">Cao</td>
-</tr>
-<tr>
-<td class="px-3 py-2 font-medium">Công trình xây dựng</td>
-<td class="px-3 py-2 text-slate-500 italic">Trung bình</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div class="analysis-card">
-<div class="flex justify-between items-start">
-<div>
-<h2 class="text-xl font-bold text-slate-900 dark:text-white">Trạm 02</h2>
-<p class="text-xs text-slate-500 font-medium">Khu Sản Xuất</p>
-</div>
-<span class="material-symbols-outlined text-primary">factory</span>
-</div>
-<div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Chỉ số trung bình từ nguồn phát thải</p>
-<div class="grid grid-cols-4 gap-2">
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">PM1.0</span>
-<span class="text-lg font-bold">32</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">PM2.5</span>
-<span class="text-lg font-bold">48</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">PM10</span>
-<span class="text-lg font-bold">92</span>
-</div>
-<div class="metric-box border-l-2 border-l-primary">
-<span class="text-[9px] font-bold text-primary uppercase">TVOC</span>
-<span class="text-lg font-bold">1.45</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">CO</span>
-<span class="text-lg font-bold">2.4</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">CO2</span>
-<span class="text-lg font-bold">580</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">NO2</span>
-<span class="text-lg font-bold">0.15</span>
-</div>
-</div>
-<p class="text-[9px] text-slate-500 mt-3 leading-tight italic">Các giá trị trên thể hiện mức độ đóng góp trung bình từ các nguồn ô nhiễm được phân tích</p>
-</div>
-<div>
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Nguồn ô nhiễm ảnh hưởng</p>
-<div class="space-y-4">
-<div class="space-y-1.5">
-<div class="flex justify-between text-xs font-bold uppercase">
-<span>Công nghiệp</span>
-<span>65%</span>
-</div>
-<div class="source-bar-bg"><div class="source-bar-fill bg-quality-moderate" style="width: 65%"></div></div>
-</div>
-<div class="space-y-1.5">
-<div class="flex justify-between text-xs font-bold uppercase">
-<span>Giao thông</span>
-<span>15%</span>
-</div>
-<div class="source-bar-bg"><div class="source-bar-fill bg-quality-moderate opacity-70" style="width: 15%"></div></div>
-</div>
-<div class="space-y-1.5">
-<div class="flex justify-between text-xs font-bold uppercase">
-<span>Bụi đường</span>
-<span>15%</span>
-</div>
-<div class="source-bar-bg"><div class="source-bar-fill bg-quality-moderate opacity-50" style="width: 15%"></div></div>
-</div>
-</div>
-</div>
-<div class="mt-auto">
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tóm tắt nguồn chính</p>
-<div class="overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800">
-<table class="w-full text-left text-xs">
-<thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 uppercase font-bold">
-<tr>
-<th class="px-3 py-2">Nguồn</th>
-<th class="px-3 py-2">Tác động</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-<tr>
-<td class="px-3 py-2 font-medium">Lò hơi công nghiệp</td>
-<td class="px-3 py-2 text-slate-500 italic">Rất cao</td>
-</tr>
-<tr>
-<td class="px-3 py-2 font-medium">Khí thải hóa chất</td>
-<td class="px-3 py-2 text-slate-500 italic">Cao</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div class="analysis-card">
-<div class="flex justify-between items-start">
-<div>
-<h2 class="text-xl font-bold text-slate-900 dark:text-white">Trạm 03</h2>
-<p class="text-xs text-slate-500 font-medium">Kho Hóa Chất</p>
-</div>
-<span class="material-symbols-outlined text-primary">warehouse</span>
-</div>
-<div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Chỉ số trung bình từ nguồn phát thải</p>
-<div class="grid grid-cols-4 gap-2">
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">PM1.0</span>
-<span class="text-lg font-bold">65</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">PM2.5</span>
-<span class="text-lg font-bold">110</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">PM10</span>
-<span class="text-lg font-bold">205</span>
-</div>
-<div class="metric-box border-l-2 border-l-primary">
-<span class="text-[9px] font-bold text-primary uppercase">TVOC</span>
-<span class="text-lg font-bold">4.82</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">CO</span>
-<span class="text-lg font-bold">4.2</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">CO2</span>
-<span class="text-lg font-bold">850</span>
-</div>
-<div class="metric-box">
-<span class="text-[9px] font-bold text-slate-400 uppercase">NO2</span>
-<span class="text-lg font-bold">0.45</span>
-</div>
-</div>
-<p class="text-[9px] text-slate-500 mt-3 leading-tight italic">Các giá trị trên thể hiện mức độ đóng góp trung bình từ các nguồn ô nhiễm được phân tích</p>
-</div>
-<div>
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Nguồn ô nhiễm ảnh hưởng</p>
-<div class="space-y-4">
-<div class="space-y-1.5">
-<div class="flex justify-between text-xs font-bold uppercase">
-<span>Công nghiệp</span>
-<span>55%</span>
-</div>
-<div class="source-bar-bg"><div class="source-bar-fill bg-quality-poor" style="width: 55%"></div></div>
-</div>
-<div class="space-y-1.5">
-<div class="flex justify-between text-xs font-bold uppercase">
-<span>Đốt rác</span>
-<span>30%</span>
-</div>
-<div class="source-bar-bg"><div class="source-bar-fill bg-quality-poor opacity-70" style="width: 30%"></div></div>
-</div>
-<div class="space-y-1.5">
-<div class="flex justify-between text-xs font-bold uppercase">
-<span>Giao thông</span>
-<span>10%</span>
-</div>
-<div class="source-bar-bg"><div class="source-bar-fill bg-quality-poor opacity-50" style="width: 10%"></div></div>
-</div>
-</div>
-</div>
-<div class="mt-auto">
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tóm tắt nguồn chính</p>
-<div class="overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800">
-<table class="w-full text-left text-xs">
-<thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 uppercase font-bold">
-<tr>
-<th class="px-3 py-2">Nguồn</th>
-<th class="px-3 py-2">Tác động</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-<tr>
-<td class="px-3 py-2 font-medium">Dung môi bay hơi</td>
-<td class="px-3 py-2 text-slate-500 italic">Nguy kịch</td>
-</tr>
-<tr>
-<td class="px-3 py-2 font-medium">Rác thải tập trung</td>
-<td class="px-3 py-2 text-slate-500 italic">Rất cao</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</main>
-<footer class="flex-none bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-8 py-3 flex justify-between items-center">
-<div class="flex gap-8 items-center">
-<div class="flex items-center gap-2">
-<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Trạng thái hệ thống:</span>
-<span class="text-[10px] font-bold text-quality-good flex items-center gap-1">
-<span class="size-1.5 rounded-full bg-quality-good animate-pulse"></span> Đang hoạt động ổn định
-                </span>
-</div>
-<div class="flex items-center gap-2">
-<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cập nhật:</span>
-<span class="text-[10px] font-bold text-slate-600 dark:text-slate-300">14:25:30 - 21/05/2024</span>
-</div>
-</div>
-<div class="text-[10px] text-slate-400 font-medium italic uppercase tracking-tight">
-            * Dữ liệu phân tích dựa trên thuật toán học máy và cảm biến thời gian thực
+    <aside class="w-64 bg-white dark:bg-sidebar-bg flex-none flex flex-col border-r border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <div class="p-5 flex items-center gap-3">
+            <div class="bg-primary rounded-lg p-1.5 text-white flex items-center justify-center"><span class="material-symbols-outlined text-2xl">air</span></div>
+            <span class="text-slate-800 dark:text-white font-bold text-lg tracking-tight uppercase">Air Monitor</span>
         </div>
-</footer>
-</div>
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="main.html">
+                <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">home</span>
+                <span class="font-medium">Tổng quan</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="forecast.html">
+                <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">partly_cloudy_day</span>
+                <span class="font-medium">Dự báo</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all text-sm" href="#">
+                <span class="material-symbols-outlined text-xl">analytics</span>
+                <span class="font-medium">Phân tích</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="history.html">
+                <span class="material-symbols-outlined text-xl">history</span>
+                <span>Lịch sử trạm</span>
+            </a>
+        </nav>
+    </aside>
 
-</body></html>
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="flex-none z-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-white to-slate-50 dark:from-slate-900 dark:to-slate-800/50 px-8 py-6">
+            <div>
+                <h1 class="text-3xl font-bold leading-tight bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">Phân Tích Cụm Dữ Liệu</h1>
+                <p class="text-xs text-slate-500 font-semibold mt-1.5 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                    Phân nhóm tự động dựa trên đặc tính nguồn thải
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 px-4 py-2 rounded-xl flex items-center gap-2.5 shadow-sm">
+                    <span class="material-symbols-outlined text-primary text-lg">hub</span>
+                    <span class="text-sm font-bold text-primary">Spectral Clustering</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8 no-scrollbar">
+            <div id="analysis-container" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="col-span-full flex flex-col items-center justify-center py-24 text-slate-400">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-4xl animate-spin text-primary">sync</span>
+                    </div>
+                    <p class="text-lg font-semibold text-slate-600 dark:text-slate-300">Đang tải và phân tích dữ liệu cụm...</p>
+                    <p class="text-sm text-slate-400 mt-1">Vui lòng chờ trong giây lát</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/clusters';
+        
+        let GLOBAL_DATA = {};
+
+        // 1. CẤU HÌNH NGƯỠNG (GIỐNG CÁC TRANG KHÁC)
+        const THRESHOLDS = {
+            pm1: { moderate: 35, poor: 75 },
+            pm25: { moderate: 35, poor: 75 },
+            pm10: { moderate: 50, poor: 150 },
+            co: { moderate: 10, poor: 30 },      
+            co2: { moderate: 1000, poor: 2000 }, 
+            no2: { moderate: 100, poor: 200 },     
+            tvoc: { moderate: 200, poor: 600 },    
+        };
+
+        // 2. CẤU HÌNH MÀU SẮC CLASS TAILWIND
+        const TEXT_CLASSES = {
+            good: "text-quality-good",       // Xanh lá
+            moderate: "text-quality-moderate", // Vàng
+            poor: "text-quality-poor",       // Đỏ
+            default: "text-slate-900 dark:text-white"
+        };
+
+        const ICON_CLASSES = {
+            good: "text-quality-good",
+            moderate: "text-quality-moderate",
+            poor: "text-quality-poor",
+            default: "text-slate-400"
+        };
+
+        const SPECIAL_COLORS = {
+            temperature: "text-blue-600",    // Nhiệt độ: Xanh dương
+            humidity: "text-indigo-600"      // Độ ẩm: Tím than
+        };
+
+        // Hàm format số
+        const fmt = (val) => val != null ? parseFloat(val).toFixed(2) : "--";
+
+        // 3. HÀM TÍNH TOÁN MỨC ĐỘ (Level)
+        function getLevel(metricKey, value) {
+            if (value == null) return 'default';
+            
+            let thresholdKey = metricKey;
+            // Map tên key nếu cần thiết
+            if (metricKey === 'voc') thresholdKey = 'tvoc';
+            if (metricKey === 'pm2.5') thresholdKey = 'pm25';
+
+            const rule = THRESHOLDS[thresholdKey];
+            if (!rule) return 'default'; 
+
+            if (value >= rule.poor) return 'poor';
+            if (value >= rule.moderate) return 'moderate';
+            return 'good';
+        }
+
+        async function loadClusters() {
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+                
+                if (result.status !== 'OK') throw new Error(result.error);
+
+                GLOBAL_DATA = result.data;
+                renderInterface(GLOBAL_DATA);
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('analysis-container').innerHTML = `
+                    <div class="col-span-full text-center text-red-500">
+                        Lỗi tải dữ liệu: ${error.message}
+                    </div>`;
+            }
+        }
+
+        function renderInterface(data) {
+            const container = document.getElementById('analysis-container');
+            container.innerHTML = '';
+
+            const nodeOrder = ['NODE_01', 'NODE_02', 'NODE_03'];
+            const nodeNames = {
+                'NODE_01': 'Trạm 01 - Sảnh Chính',
+                'NODE_02': 'Trạm 02 - Khu Sản Xuất',
+                'NODE_03': 'Trạm 03 - Kho Hóa Chất'
+            };
+
+            nodeOrder.forEach(nodeKey => {
+                const clusters = data[nodeKey];
+                
+                if (!clusters || clusters.length === 0) {
+                    container.innerHTML += createEmptyCard(nodeKey, nodeNames[nodeKey]);
+                    return;
+                }
+
+                const cardHTML = createNodeCard(nodeKey, nodeNames[nodeKey], clusters);
+                container.insertAdjacentHTML('beforeend', cardHTML);
+
+                selectCluster(nodeKey, 0);
+            });
+        }
+
+        function createNodeCard(nodeKey, nodeName, clusters) {
+            let buttonsHTML = '';
+            clusters.forEach((cluster, index) => {
+                buttonsHTML += `
+                    <button onclick="selectCluster('${nodeKey}', ${index})" 
+                            id="btn-${nodeKey}-${index}"
+                            class="cluster-btn inactive w-full mb-2.5">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-lg">data_usage</span>
+                            </div>
+                            <span>Cụm ${index + 1}</span>
+                        </div>
+                        <span class="text-xs opacity-70 font-medium bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-lg">${cluster.point_count}</span>
+                    </button>
+                `;
+            });
+
+            return `
+                <div class="analysis-card">
+                    <div class="flex justify-between items-start pb-4 border-b border-slate-200 dark:border-slate-700">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-1">${nodeName}</h2>
+                            <p class="text-sm text-slate-500 font-medium flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                Phát hiện ${clusters.length} mẫu ô nhiễm đặc trưng
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-2xl">bubble_chart</span>
+                        </div>
+                    </div>
+
+                    <div id="metrics-${nodeKey}" class="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-800/30 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 transition-all">
+                    </div>
+
+                    <div class="mt-auto">
+                        <div class="flex items-center justify-between mb-4">
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                                <span class="w-1 h-4 bg-primary rounded-full"></span>
+                                Danh sách cụm
+                            </p>
+                            <span class="text-xs text-slate-400 font-medium">Sắp xếp theo độ lớn</span>
+                        </div>
+                        <div class="max-h-52 overflow-y-auto pr-2 custom-scrollbar space-y-1">
+                            ${buttonsHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.selectCluster = function(nodeKey, index) {
+            const clusters = GLOBAL_DATA[nodeKey];
+            const cluster = clusters[index];
+
+            const metricsContainer = document.getElementById(`metrics-${nodeKey}`);
+            
+            // Cập nhật: Truyền key (pm1, pm25...) vào renderMetricBox
+            metricsContainer.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary/30">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-700 dark:text-slate-300">Chi tiết Cụm ${index + 1}</p>
+                            <p class="text-xs text-slate-500">Top ${index + 1} theo kích thước</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-white bg-gradient-to-r from-primary to-blue-600 px-3 py-1.5 rounded-lg shadow-md">
+                        ${cluster.point_count} mẫu
+                    </span>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    ${renderMetricBox("pm1", "PM1.0", cluster.pm1_avg, "µg/m³")}
+                    ${renderMetricBox("pm25", "PM2.5", cluster.pm25_avg, "µg/m³")}
+                    ${renderMetricBox("pm10", "PM10", cluster.pm10_avg, "µg/m³")}
+                    ${renderMetricBox("temperature", "Nhiệt độ", cluster.temperature_avg, "°C")}
+                    ${renderMetricBox("humidity", "Độ ẩm", cluster.humidity_avg, "%")}
+                    ${renderMetricBox("co", "CO", cluster.co_avg, "ppm")}
+                    ${renderMetricBox("co2", "CO₂", cluster.co2_avg, "ppm")}
+                    ${renderMetricBox("no2", "NO₂", cluster.no2_avg, "ppb")}
+                    ${renderMetricBox("tvoc", "TVOC", cluster.tvoc_avg, "ppb")}
+                </div>
+            `;
+
+            const allBtns = document.querySelectorAll(`button[id^="btn-${nodeKey}-"]`);
+            allBtns.forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('inactive');
+            });
+
+            const activeBtn = document.getElementById(`btn-${nodeKey}-${index}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('inactive');
+                activeBtn.classList.add('active');
+            }
+        };
+
+        // 4. HÀM RENDER BOX CHỈ SỐ VỚI MÀU SẮC
+        function renderMetricBox(key, label, value, unit) {
+            let colorClass = "text-slate-900 dark:text-white";
+            let iconColorClass = "text-slate-400";
+
+            // Xử lý màu sắc
+            if (key === 'temperature') {
+                colorClass = SPECIAL_COLORS.temperature;
+                iconColorClass = SPECIAL_COLORS.temperature;
+            } else if (key === 'humidity') {
+                colorClass = SPECIAL_COLORS.humidity;
+                iconColorClass = SPECIAL_COLORS.humidity;
+            } else {
+                const level = getLevel(key, value);
+                colorClass = TEXT_CLASSES[level] || TEXT_CLASSES.default;
+                iconColorClass = ICON_CLASSES[level] || ICON_CLASSES.default;
+            }
+            
+            return `
+                <div class="metric-box">
+                    <div class="flex items-center gap-1 mb-1">
+                        <span class="material-symbols-outlined text-xs ${iconColorClass}">circle</span>
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">${label}</span>
+                    </div>
+                    <span class="text-lg font-bold ${colorClass}">
+                        ${fmt(value)}
+                    </span>
+                    <span class="text-[10px] font-semibold text-slate-400 mt-0.5">${unit}</span>
+                </div>
+            `;
+        }
+
+        function createEmptyCard(nodeKey, nodeName) {
+            return `
+                <div class="analysis-card opacity-70">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-slate-400">info</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-700 dark:text-slate-300">${nodeName}</h2>
+                    </div>
+                    <div class="flex-1 flex items-center justify-center">
+                        <p class="text-slate-500 text-center">Chưa có dữ liệu phân cụm cho trạm này.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', loadClusters);
+    </script>
+</body>
+</html>

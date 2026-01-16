@@ -392,3 +392,62 @@ def get_history_data(node, start_date=None, end_date=None, page=1, limit=15):
     finally:
         conn.close()
 
+
+
+def get_all_forecasts():
+    conn = get_connection()
+    try:
+        # Lấy dữ liệu từ bảng forecasts
+        df = pd.read_sql_query("SELECT * FROM forecasts", conn)
+        
+        # Xử lý NaN thành None để tránh lỗi JSON
+        if not df.empty:
+            df = df.replace({np.nan: None})
+            return df.to_dict(orient="records")
+        return []
+    except Exception as e:
+        logger.error(f"Lỗi lấy dữ liệu forecast: {e}")
+        return []
+    finally:
+        conn.close()
+
+def get_latest_forecasts():
+    conn = get_connection()
+    try:
+        # Câu query này chỉ lấy bản ghi có ID lớn nhất (mới nhất) cho từng node
+        query = """
+        SELECT * FROM forecasts 
+        WHERE id IN (
+            SELECT MAX(id) 
+            FROM forecasts 
+            GROUP BY node
+        )
+        """
+        df = pd.read_sql_query(query, conn)
+        
+        if not df.empty:
+            df = df.replace({np.nan: None})
+            return df.to_dict(orient="records")
+        return []
+    except Exception as e:
+        logger.error(f"Lỗi lấy dữ liệu forecast mới nhất: {e}")
+        return []
+    finally:
+        conn.close()
+
+def get_all_clusters_sorted():
+    conn = get_connection()
+    try:
+        # Lấy tất cả cụm, sắp xếp theo Node -> Số lượng điểm giảm dần (DESC)
+        query = "SELECT * FROM cluster_averages ORDER BY node, point_count DESC"
+        df = pd.read_sql_query(query, conn)
+        
+        if not df.empty:
+            df = df.replace({np.nan: None})
+            return df.to_dict(orient="records")
+        return []
+    except Exception as e:
+        logger.error(f"Lỗi lấy dữ liệu cluster: {e}")
+        return []
+    finally:
+        conn.close()

@@ -226,8 +226,8 @@ def daily_task():
 
 
 
-# schedule.every().day.at(f"{DAILY_TRAIN_HOUR:02d}:{DAILY_TRAIN_MINUTE:02d}").do(daily_task)
-schedule.every(1).minutes.do(daily_task)
+schedule.every().day.at(f"{DAILY_TRAIN_HOUR:02d}:{DAILY_TRAIN_MINUTE:02d}").do(daily_task)
+#schedule.every(1).minutes.do(daily_task)
 
 
 def run_scheduler():
@@ -347,6 +347,42 @@ def export_data():
     finally:
         conn.close()
 
+@app.route('/api/forecast', methods=['GET'])
+def get_forecast_api():
+    try:
+        # Gọi hàm lấy dữ liệu mới nhất
+        data = get_latest_forecasts()
+        
+        return jsonify({
+            "status": "OK", 
+            "data": data, 
+            "last_update": datetime.now().strftime("%H:%M:%S - %d/%m/%Y")
+        })
+    except Exception as e:
+        logger.error(f"Lỗi API forecast: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/clusters', methods=['GET'])
+def get_clusters_api():
+    try:
+        raw_data = get_all_clusters_sorted()
+        
+        # Gom nhóm dữ liệu theo Node để Frontend dễ xử lý
+        # Kết quả: { "NODE_01": [ {cluster1}, {cluster2}... ], "NODE_02": [...] }
+        grouped_data = {}
+        for row in raw_data:
+            node = row['node']
+            if node not in grouped_data:
+                grouped_data[node] = []
+            grouped_data[node].append(row)
+            
+        return jsonify({
+            "status": "OK",
+            "data": grouped_data
+        })
+    except Exception as e:
+        logger.error(f"Lỗi API clusters: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/status')
 def status():

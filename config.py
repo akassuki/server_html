@@ -22,11 +22,11 @@ FORECAST_STEPS = 360                # Dự báo 6 giờ trực tiếp
 FORECAST_MULTIPLIER = 4.0           # Ước lượng 24 giờ (6h × 4)
 
 # Ngưỡng tối thiểu dữ liệu
-MIN_TRAIN_POINTS = 300              # Tối thiểu để train LSTM
+MIN_TRAIN_POINTS = 300              # Tối thiểu để train LSTM #@
 MIN_PREDICT_POINTS = 60             # Tối thiểu để dự báo
 
 # Spectral Clustering
-CLUSTER_MIN_POINTS = 120
+CLUSTER_MIN_POINTS = 120 #@
 CLUSTER_MAX_CLUSTERS = 10
 CLUSTER_USE_FULL_DAY = True
 CLUSTER_MAX_POINTS = 1440
