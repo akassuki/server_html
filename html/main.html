@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Giám Sát Trạm Quan Trắc</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "quality-good": "#10b981",
+                        "quality-moderate": "#f59e0b",
+                        "quality-poor": "#ef4444",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "sidebar-bg": "#1e293b", // Màu nền sidebar dark mode
+                    },
+                    fontFamily: { "display": ["Space Grotesk"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .sensor-box { cursor: pointer; transition: all 0.2s; }
+        .sensor-box:hover { transform: translateY(-2px); border-color: #137fec; background-color: #f0f9ff; }
+        .dark .sensor-box:hover { background-color: #1e293b; border-color: #3b82f6; }
+        .sensor-active { border-color: #137fec !important; background-color: #eff6ff !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .dark .sensor-active { border-color: #3b82f6 !important; background-color: #1e293b !important; }
+        
+        /* Animation pulse cho trạng thái Online */
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .status-pulse { animation: pulse-green 2s infinite; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-hidden h-screen flex">
+
+<aside class="w-64 bg-white dark:bg-sidebar-bg flex-none flex flex-col border-r border-slate-200 dark:border-slate-800 transition-colors duration-200">
+    <div class="p-5 flex items-center gap-3">
+        <div class="bg-primary rounded-lg p-1.5 text-white flex items-center justify-center"><span class="material-symbols-outlined text-2xl">air</span></div>
+        <span class="text-slate-800 dark:text-white font-bold text-lg tracking-tight uppercase">Air Monitor</span>
+    </div>
+    
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all text-sm" href="#">
+            <span class="material-symbols-outlined text-xl">dashboard</span>
+            <span>Tổng quan</span>
+        </a>
+
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="forecast.html">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">partly_cloudy_day</span>
+            <span class="font-medium">Dự báo</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="analysis.html">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">analytics</span>
+            <span class="font-medium">Phân tích</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="history.html">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">history</span>
+            <span class="font-medium">Lịch sử trạm</span>
+        </a>
+    </nav>
+
+    <div class="p-5">
+        <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phiên bản</p>
+            <p class="text-xs text-slate-700 dark:text-slate-200 font-semibold">v2.4.0 (Enterprise)</p>
+        </div>
+    </div>
+</aside>
+
+<div class="flex-1 flex flex-col overflow-hidden">
+    
+    <header class="flex-none z-20 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-3">
+        <div>
+            <h1 class="text-lg font-bold leading-tight uppercase tracking-tight">Giám Sát Trạm</h1>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Hệ thống Quan trắc • Realtime</p>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4 text-xs font-bold">
+                 <div class="flex items-center gap-1.5"><span class="size-2 rounded-full bg-quality-good"></span><span>Tốt</span></div>
+                 <div class="flex items-center gap-1.5"><span class="size-2 rounded-full bg-quality-moderate"></span><span>Trung bình</span></div>
+                 <div class="flex items-center gap-1.5"><span class="size-2 rounded-full bg-quality-poor"></span><span>Xấu</span></div>
+            </div>
+            <div class="h-6 w-px bg-slate-200 dark:bg-slate-800"></div>
+            <button type="button" onclick="loadRealtime()" class="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30 active:scale-95 transform duration-100">
+                <span class="material-symbols-outlined text-sm">refresh</span><span>Làm mới</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-6 flex flex-col">
+        <section class="flex-1 flex flex-col" id="overview">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold flex items-center gap-3 text-slate-800 dark:text-slate-100">
+                    <span class="material-symbols-outlined text-primary text-3xl">monitoring</span>Giám sát Trực tuyến
+                </h2>
+                <div class="text-xs text-slate-400 font-medium uppercase tracking-wider">Chọn ô chỉ số để xem biểu đồ chi tiết</div>
+            </div>
+            
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 flex-1 content-start">
+                
+                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
+                        <div>
+                            <h3 class="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm tracking-tight">Trạm 01 (NODE_1)</h3>
+                            <div class="flex items-center gap-1.5 mt-1"><span id="station1-status-dot" class="size-2 rounded-full bg-slate-400"></span><span id="station1-status-text" class="text-[10px] font-black text-slate-400 uppercase tracking-wider">...</span></div>
+                        </div>
+                        <span id="station1-time" class="text-[10px] text-slate-500 font-bold bg-white dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 uppercase">--:--</span>
+                    </div>
+                    <div class="p-4 grid grid-cols-3 gap-2.5">
+                         <div onclick="switchChart(this, 'station1', 'pm1', 'PM 1.0')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">PM 1.0</span><span id="station1-pm1" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">µg/m³</span><span id="station1-pm1-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station1', 'pm25', 'PM 2.5')" class="sensor-box sensor-active p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">PM 2.5</span><span id="station1-pm25" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">µg/m³</span><span id="station1-pm25-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station1', 'pm10', 'PM 10')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">PM 10</span><span id="station1-pm10" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">µg/m³</span><span id="station1-pm10-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station1', 'co', 'CO')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">CO</span><span id="station1-co" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppm</span><span id="station1-co-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station1', 'co2', 'CO2')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">CO2</span><span id="station1-co2" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppm</span><span id="station1-co2-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station1', 'no2', 'NO2')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">NO2</span><span id="station1-no2" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppb</span><span id="station1-no2-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station1', 'tvoc', 'TVOC')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">TVOC</span><span id="station1-voc" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppb</span><span id="station1-voc-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         
+                         <div onclick="switchChart(this, 'station1', 'temperature', 'Nhiệt độ')" class="sensor-box p-2.5 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 flex flex-col items-center"><span class="text-[9px] font-bold text-blue-500 uppercase">Nhiệt độ</span><span id="station1-temperature" class="text-base font-bold text-blue-600">--</span><span class="text-[8px] text-blue-500">°C</span><span id="station1-temperature-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station1', 'humidity', 'Độ ẩm')" class="sensor-box p-2.5 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 flex flex-col items-center"><span class="text-[9px] font-bold text-indigo-500 uppercase">Độ ẩm</span><span id="station1-humidity" class="text-base font-bold text-indigo-600">--</span><span class="text-[8px] text-indigo-500">%</span><span id="station1-humidity-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                    </div>
+                    
+                    <div class="mt-auto pt-0 pb-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+                        <div class="px-5 pt-3 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">
+                            <span id="station1-chart-title">Lịch sử PM 2.5</span>
+                            <span class="text-primary font-black uppercase">Trạm 1</span>
+                        </div>
+                        <div class="relative h-28 w-full overflow-hidden px-3 pb-2">
+                            <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 300 120">
+                                <defs>
+                                    <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#137fec; stop-opacity:0.4" />
+                                        <stop offset="100%" style="stop-color:#137fec; stop-opacity:0" />
+                                    </linearGradient>
+                                </defs>
+                                <path id="station1-graph-area" d="" fill="url(#grad1)"></path>
+                                <path id="station1-graph-line" d="" fill="none" stroke="#137fec" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+                                <g id="station1-graph-labels" font-family="Space Grotesk" font-size="12" fill="#94a3b8" font-weight="600"></g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
+                        <div>
+                            <h3 class="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm tracking-tight">Trạm 02 (NODE_2)</h3>
+                            <div class="flex items-center gap-1.5 mt-1"><span id="station2-status-dot" class="size-2 rounded-full bg-slate-400"></span><span id="station2-status-text" class="text-[10px] font-black text-slate-400 uppercase tracking-wider">...</span></div>
+                        </div>
+                        <span id="station2-time" class="text-[10px] text-slate-500 font-bold bg-white dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 uppercase">--:--</span>
+                    </div>
+                    <div class="p-4 grid grid-cols-3 gap-2.5">
+                         <div onclick="switchChart(this, 'station2', 'pm1', 'PM 1.0')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">PM 1.0</span><span id="station2-pm1" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">µg/m³</span><span id="station2-pm1-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station2', 'pm25', 'PM 2.5')" class="sensor-box sensor-active p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">PM 2.5</span><span id="station2-pm25" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">µg/m³</span><span id="station2-pm25-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station2', 'pm10', 'PM 10')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">PM 10</span><span id="station2-pm10" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">µg/m³</span><span id="station2-pm10-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station2', 'co', 'CO')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">CO</span><span id="station2-co" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppm</span><span id="station2-co-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station2', 'co2', 'CO2')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">CO2</span><span id="station2-co2" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppm</span><span id="station2-co2-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station2', 'no2', 'NO2')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">NO2</span><span id="station2-no2" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppb</span><span id="station2-no2-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station2', 'tvoc', 'TVOC')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">TVOC</span><span id="station2-voc" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppb</span><span id="station2-voc-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         
+                         <div onclick="switchChart(this, 'station2', 'temperature', 'Nhiệt độ')" class="sensor-box p-2.5 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 flex flex-col items-center"><span class="text-[9px] font-bold text-blue-500 uppercase">Nhiệt độ</span><span id="station2-temperature" class="text-base font-bold text-blue-600">--</span><span class="text-[8px] text-blue-500">°C</span><span id="station2-temperature-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station2', 'humidity', 'Độ ẩm')" class="sensor-box p-2.5 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 flex flex-col items-center"><span class="text-[9px] font-bold text-indigo-500 uppercase">Độ ẩm</span><span id="station2-humidity" class="text-base font-bold text-indigo-600">--</span><span class="text-[8px] text-indigo-500">%</span><span id="station2-humidity-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                    </div>
+                    
+                    <div class="mt-auto pt-0 pb-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+                        <div class="px-5 pt-3 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">
+                            <span id="station2-chart-title">Lịch sử PM 2.5</span>
+                            <span class="text-quality-moderate font-black uppercase">Trạm 2</span>
+                        </div>
+                        <div class="relative h-28 w-full overflow-hidden px-3 pb-2">
+                            <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 300 120">
+                                <defs>
+                                    <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#f59e0b; stop-opacity:0.4" />
+                                        <stop offset="100%" style="stop-color:#f59e0b; stop-opacity:0" />
+                                    </linearGradient>
+                                </defs>
+                                <path id="station2-graph-area" d="" fill="url(#grad2)"></path>
+                                <path id="station2-graph-line" d="" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+                                <g id="station2-graph-labels" font-family="Space Grotesk" font-size="12" fill="#94a3b8" font-weight="600"></g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
+                        <div>
+                            <h3 class="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm tracking-tight">Trạm 03 (NODE_3)</h3>
+                            <div class="flex items-center gap-1.5 mt-1"><span id="station3-status-dot" class="size-2 rounded-full bg-slate-400"></span><span id="station3-status-text" class="text-[10px] font-black text-slate-400 uppercase tracking-wider">...</span></div>
+                        </div>
+                        <span id="station3-time" class="text-[10px] text-slate-500 font-bold bg-white dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 uppercase">--:--</span>
+                    </div>
+                    <div class="p-4 grid grid-cols-3 gap-2.5">
+                         <div onclick="switchChart(this, 'station3', 'pm1', 'PM 1.0')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">PM 1.0</span><span id="station3-pm1" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">µg/m³</span><span id="station3-pm1-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station3', 'pm25', 'PM 2.5')" class="sensor-box sensor-active p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">PM 2.5</span><span id="station3-pm25" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">µg/m³</span><span id="station3-pm25-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station3', 'pm10', 'PM 10')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">PM 10</span><span id="station3-pm10" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">µg/m³</span><span id="station3-pm10-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station3', 'co', 'CO')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">CO</span><span id="station3-co" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppm</span><span id="station3-co-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station3', 'co2', 'CO2')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">CO2</span><span id="station3-co2" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppm</span><span id="station3-co2-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station3', 'no2', 'NO2')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">NO2</span><span id="station3-no2" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppb</span><span id="station3-no2-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station3', 'tvoc', 'TVOC')" class="sensor-box p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400 uppercase">TVOC</span><span id="station3-voc" class="text-base font-bold">--</span><span class="text-[8px] text-slate-400">ppb</span><span id="station3-voc-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         
+                         <div onclick="switchChart(this, 'station3', 'temperature', 'Nhiệt độ')" class="sensor-box p-2.5 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 flex flex-col items-center"><span class="text-[9px] font-bold text-blue-500 uppercase">Nhiệt độ</span><span id="station3-temperature" class="text-base font-bold text-blue-600">--</span><span class="text-[8px] text-blue-500">°C</span><span id="station3-temperature-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                         <div onclick="switchChart(this, 'station3', 'humidity', 'Độ ẩm')" class="sensor-box p-2.5 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 flex flex-col items-center"><span class="text-[9px] font-bold text-indigo-500 uppercase">Độ ẩm</span><span id="station3-humidity" class="text-base font-bold text-indigo-600">--</span><span class="text-[8px] text-indigo-500">%</span><span id="station3-humidity-avg" class="text-[8px] text-slate-400/70 font-medium mt-0.5">TB: --</span></div>
+                    </div>
+                    
+                    <div class="mt-auto pt-0 pb-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+                        <div class="px-5 pt-3 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">
+                            <span id="station3-chart-title">Lịch sử PM 2.5</span>
+                            <span class="text-quality-good font-black uppercase">Trạm 3</span>
+                        </div>
+                        <div class="relative h-28 w-full overflow-hidden px-3 pb-2">
+                            <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 300 120">
+                                <defs>
+                                    <linearGradient id="grad3" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#10b981; stop-opacity:0.4" />
+                                        <stop offset="100%" style="stop-color:#10b981; stop-opacity:0" />
+                                    </linearGradient>
+                                </defs>
+                                <path id="station3-graph-area" d="" fill="url(#grad3)"></path>
+                                <path id="station3-graph-line" d="" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+                                <g id="station3-graph-labels" font-family="Space Grotesk" font-size="12" fill="#94a3b8" font-weight="600"></g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:3000/api/dashboard/realtime";
+
+    const THRESHOLDS = {
+        pm1: { moderate: 35, poor: 75 },
+        pm25: { moderate: 35, poor: 75 },
+        pm10: { moderate: 50, poor: 150 },
+        co: { moderate: 10, poor: 30 },      
+        co2: { moderate: 1000, poor: 2000 }, 
+        no2: { moderate: 100, poor: 200 },    
+        tvoc: { moderate: 200, poor: 600 },   
+    };
+
+    const COLORS = {
+        good: "#10b981",      // Xanh lá
+        moderate: "#f59e0b",  // Vàng
+        poor: "#ef4444",      // Đỏ
+        default: "#137fec"    
+    };
+
+    // ĐỊNH NGHĨA MÀU CỐ ĐỊNH CHO NHIỆT/ẨM
+    const SPECIAL_COLORS = {
+        temperature: { text: "text-blue-600", chart: "#2563eb" },       // Blue
+        humidity: { text: "text-indigo-600", chart: "#4f46e5" }         // Indigo
+    };
+
+    const TEXT_CLASSES = {
+        good: "text-quality-good",
+        moderate: "text-quality-moderate",
+        poor: "text-quality-poor",
+        default: "text-primary"
+    };
+
+    const keyMap = {
+        "pm1": "pm1", 
+        "pm25": "pm25", 
+        "pm10": "pm10",
+        "co": "co", 
+        "co2": "co2", 
+        "no2": "no2",
+        "tvoc": "voc", 
+        "temperature": "temperature", 
+        "humidity": "humidity"
+    };
+
+    const stationDataStore = {
+        station1: { history: [], currentMetric: 'pm25' },
+        station2: { history: [], currentMetric: 'pm25' },
+        station3: { history: [], currentMetric: 'pm25' }
+    };
+
+    function getLevel(metricKey, value) {
+        let thresholdKey = metricKey;
+        if (metricKey === 'voc') thresholdKey = 'tvoc';
+        if (metricKey === 'pm2.5') thresholdKey = 'pm25';
+
+        const rule = THRESHOLDS[thresholdKey];
+        if (!rule || value === null) return 'good'; 
+
+        if (value >= rule.poor) return 'poor';
+        if (value >= rule.moderate) return 'moderate';
+        return 'good';
+    }
+
+    function setText(id, val) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = (val !== null && val !== undefined) ? val : "--";
+    }
+
+    // === HÀM VẼ BIỂU ĐỒ ===
+    function drawChart(prefix, historyData, metricKey) {
+        if (!historyData || historyData.length < 2) return;
+
+        const values = historyData.map(d => d[metricKey] || 0);
+        const times = historyData.map(d => d.timestamp);
+        const latestValue = values[values.length - 1]; 
+
+        // --- XỬ LÝ MÀU BIỂU ĐỒ ---
+        let chartColor, textClass;
+
+        // Nếu là Nhiệt độ hoặc Độ ẩm -> Lấy màu cố định
+        if (metricKey === 'temperature') {
+            chartColor = SPECIAL_COLORS.temperature.chart;
+            textClass = SPECIAL_COLORS.temperature.text;
+        } 
+        else if (metricKey === 'humidity') {
+            chartColor = SPECIAL_COLORS.humidity.chart;
+            textClass = SPECIAL_COLORS.humidity.text;
+        } 
+        // Các chỉ số khác -> Tính theo ngưỡng
+        else {
+            const level = getLevel(metricKey, latestValue);
+            chartColor = COLORS[level];
+            textClass = TEXT_CLASSES[level];
+        }
+        // --------------------------
+
+        const areaPath = document.getElementById(`${prefix}-graph-area`);
+        const linePath = document.getElementById(`${prefix}-graph-line`);
+        const labelsGroup = document.getElementById(`${prefix}-graph-labels`);
+        
+        // Cập nhật màu Title của Chart
+        const chartTitle = document.querySelector(`#${prefix}-chart-title + span`);
+        if(chartTitle) {
+            // Xóa hết class cũ
+            chartTitle.className = `uppercase font-black ${textClass}`;
+        }
+
+        if (!areaPath || !linePath || !labelsGroup) return;
+
+        linePath.setAttribute('stroke', chartColor);
+        
+        const stationNum = prefix.replace('station', ''); 
+        const gradId = `grad${stationNum}`;
+        const gradient = document.getElementById(gradId);
+        if (gradient) {
+            const stops = gradient.querySelectorAll('stop');
+            if (stops.length >= 2) {
+                stops[0].style.stopColor = chartColor;
+                stops[0].style.stopOpacity = "0.4";
+                stops[1].style.stopColor = chartColor;
+                stops[1].style.stopOpacity = "0";
+            }
+        }
+
+        const width = 300;
+        const totalHeight = 120;
+        const graphHeight = 90;
+        
+        let maxVal = Math.max(...values);
+        if (maxVal === 0) maxVal = 10;
+        maxVal = maxVal * 1.1; 
+        const minVal = 0;
+        
+        const getX = (i) => (i / (values.length - 1)) * width;
+        const getY = (v) => graphHeight - ((v - minVal) / (maxVal - minVal)) * graphHeight;
+
+        let d = `M ${getX(0)} ${getY(values[0])}`;
+        for (let i = 1; i < values.length; i++) {
+            d += ` L ${getX(i)} ${getY(values[i])}`;
+        }
+        linePath.setAttribute('d', d);
+
+        const dArea = d + ` L ${width} ${graphHeight} L 0 ${graphHeight} Z`;
+        areaPath.setAttribute('d', dArea);
+
+        labelsGroup.innerHTML = ''; 
+        const formatTime = (ts) => {
+            if(!ts) return "";
+            const date = new Date(ts);
+            return date.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+        };
+
+        const startText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        startText.setAttribute("x", 0);
+        startText.setAttribute("y", totalHeight - 5);
+        startText.textContent = formatTime(times[0]);
+        labelsGroup.appendChild(startText);
+
+        const endText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        endText.setAttribute("x", width);
+        endText.setAttribute("y", totalHeight - 5);
+        endText.setAttribute("text-anchor", "end");
+        endText.textContent = formatTime(times[times.length - 1]);
+        labelsGroup.appendChild(endText);
+    }
+
+    function switchChart(element, prefix, metricKey, label) {
+        stationDataStore[prefix].currentMetric = metricKey;
+        
+        const titleEl = document.getElementById(`${prefix}-chart-title`);
+        if(titleEl) titleEl.innerText = `Lịch sử ${label}`;
+
+        if (element && element.parentElement) {
+            const siblings = element.parentElement.querySelectorAll('.sensor-box');
+            siblings.forEach(box => box.classList.remove('sensor-active'));
+            element.classList.add('sensor-active');
+        }
+
+        drawChart(prefix, stationDataStore[prefix].history, metricKey);
+    }
+
+    function updateStation(prefix, node) {
+        if (!node) return;
+
+        const isOnline = node.status === "online";
+        const dot = document.getElementById(prefix + '-status-dot');
+        const text = document.getElementById(prefix + '-status-text');
+        
+        if (isOnline) {
+            dot.className = "size-2.5 rounded-full bg-quality-good status-pulse";
+            text.className = "text-[10px] font-black text-quality-good uppercase tracking-wider";
+            text.innerText = "ONLINE";
+        } else {
+            dot.className = "size-2.5 rounded-full bg-quality-poor";
+            text.className = "text-[10px] font-black text-quality-poor uppercase tracking-wider";
+            text.innerText = "OFFLINE";
+        }
+
+        if (node.timestamp) {
+            const date = new Date(node.timestamp);
+            setText(`${prefix}-time`, date.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}));
+        }
+
+        // Cập nhật Data
+        if (node.data) {
+            for (const [jsonKey, val] of Object.entries(node.data)) {
+                const htmlSuffix = keyMap[jsonKey];
+                if (htmlSuffix) {
+                    setText(`${prefix}-${htmlSuffix}`, val);
+                    const elementId = `${prefix}-${htmlSuffix}`;
+                    const el = document.getElementById(elementId);
+                    
+                    if (el) {
+                        // --- XỬ LÝ MÀU TEXT ---
+                        // Nếu là Nhiệt độ
+                        if (jsonKey === 'temperature') {
+                            el.className = `text-base font-bold ${SPECIAL_COLORS.temperature.text}`;
+                        } 
+                        // Nếu là Độ ẩm
+                        else if (jsonKey === 'humidity') {
+                            el.className = `text-base font-bold ${SPECIAL_COLORS.humidity.text}`;
+                        } 
+                        // Các chỉ số khác
+                        else {
+                            const level = getLevel(jsonKey, val);
+                            el.className = `text-base font-bold ${TEXT_CLASSES[level]}`;
+                        }
+                        // ----------------------
+                    }
+                }
+            }
+        }
+
+        if (node.avg) {
+            for (const [jsonKey, val] of Object.entries(node.avg)) {
+                const baseKey = jsonKey.replace('_avg', ''); 
+                const htmlSuffix = keyMap[baseKey];
+                
+                if (htmlSuffix) {
+                    let displayVal = val;
+                    if (typeof val === 'number') displayVal = val.toFixed(2);
+                    setText(`${prefix}-${htmlSuffix}-avg`, "TB: " + displayVal);
+                }
+            }
+        }
+
+        if (node.history && node.history.length > 0) {
+            stationDataStore[prefix].history = node.history;
+            if (stationDataStore[prefix].currentMetric) {
+                drawChart(prefix, node.history, stationDataStore[prefix].currentMetric);
+            }
+        }
+    }
+
+    async function loadRealtime() {
+        try {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+            
+            updateStation("station1", data.NODE_1);
+            updateStation("station2", data.NODE_2);
+            updateStation("station3", data.NODE_3);
+
+        } catch (e) {
+            console.error("Realtime error", e);
+        }
+    }
+
+    loadRealtime();
+    setInterval(loadRealtime, 5000);
+</script>
+
+</body>
+</html>

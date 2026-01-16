@@ -1,0 +1,394 @@
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Phân Tích Nguồn Với Chỉ Số Khí &amp; Bụi Mịn Trung Bình</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "quality-good": "#10b981",
+                        "quality-moderate": "#f59e0b",
+                        "quality-poor": "#ef4444",
+                        "sidebar-bg": "#1e293b",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .analysis-card {
+                @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-5 flex flex-col gap-5;
+            }
+            .source-bar-bg {
+                @apply w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden;
+            }
+            .source-bar-fill {
+                @apply h-full bg-primary rounded-full;
+            }
+            .metric-box {
+                @apply flex flex-col p-2 bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-lg;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-hidden h-screen flex">
+<aside class="w-64 bg-white dark:bg-sidebar-bg flex-none flex flex-col border-r border-slate-200 dark:border-slate-800 transition-colors duration-200">
+    <div class="p-5 flex items-center gap-3">
+        <div class="bg-primary rounded-lg p-1.5 text-white flex items-center justify-center"><span class="material-symbols-outlined text-2xl">air</span></div>
+        <span class="text-slate-800 dark:text-white font-bold text-lg tracking-tight uppercase">Air Monitor</span>
+    </div>
+    
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="main.html">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">home</span>
+            <span class="font-medium">Tổng quan</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="forecast.html">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">partly_cloudy_day</span>
+            <span class="font-medium">Dự báo</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all text-sm" href="#">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">analytics</span>
+            <span class="font-medium">Phân tích</span>
+        </a>
+        
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="history.html">
+            <span class="material-symbols-outlined text-xl">history</span>
+            <span>Lịch sử trạm</span>
+        </a>
+    </nav>
+</aside>
+
+<div class="flex-1 flex flex-col overflow-hidden">
+<header class="flex-none z-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 py-4">
+<div>
+<h1 class="text-2xl font-bold leading-tight">Phân Tích Nguồn Với Chỉ Số Khí &amp; Bụi Mịn Trung Bình</h1>
+<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Hệ thống giám sát phân tích 3 trạm đo quan trắc</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-500 text-sm">calendar_today</span>
+<span class="text-xs font-semibold">Hôm nay, 21/05/2024</span>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-8 no-scrollbar">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="analysis-card">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Trạm 01</h2>
+<p class="text-xs text-slate-500 font-medium">Khu vực Sảnh Chính</p>
+</div>
+<span class="material-symbols-outlined text-primary">location_on</span>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Chỉ số trung bình từ nguồn phát thải</p>
+<div class="grid grid-cols-4 gap-2">
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">PM1.0</span>
+<span class="text-lg font-bold">12</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">PM2.5</span>
+<span class="text-lg font-bold">18</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">PM10</span>
+<span class="text-lg font-bold">35</span>
+</div>
+<div class="metric-box border-l-2 border-l-primary">
+<span class="text-[9px] font-bold text-primary uppercase">TVOC</span>
+<span class="text-lg font-bold">0.12</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">CO</span>
+<span class="text-lg font-bold">0.8</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">CO2</span>
+<span class="text-lg font-bold">415</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">NO2</span>
+<span class="text-lg font-bold">0.03</span>
+</div>
+</div>
+<p class="text-[9px] text-slate-500 mt-3 leading-tight italic">Các giá trị trên thể hiện mức độ đóng góp trung bình từ các nguồn ô nhiễm được phân tích</p>
+</div>
+<div>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Nguồn ô nhiễm ảnh hưởng</p>
+<div class="space-y-4">
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-bold uppercase">
+<span>Giao thông</span>
+<span>45%</span>
+</div>
+<div class="source-bar-bg"><div class="source-bar-fill" style="width: 45%"></div></div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-bold uppercase">
+<span>Công nghiệp</span>
+<span>20%</span>
+</div>
+<div class="source-bar-bg"><div class="source-bar-fill opacity-70" style="width: 20%"></div></div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-bold uppercase">
+<span>Bụi đường</span>
+<span>25%</span>
+</div>
+<div class="source-bar-bg"><div class="source-bar-fill opacity-50" style="width: 25%"></div></div>
+</div>
+</div>
+</div>
+<div class="mt-auto">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tóm tắt nguồn chính</p>
+<div class="overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800">
+<table class="w-full text-left text-xs">
+<thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 uppercase font-bold">
+<tr>
+<th class="px-3 py-2">Nguồn</th>
+<th class="px-3 py-2">Tác động</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr>
+<td class="px-3 py-2 font-medium">Xe máy/Ô tô</td>
+<td class="px-3 py-2 text-slate-500 italic">Cao</td>
+</tr>
+<tr>
+<td class="px-3 py-2 font-medium">Công trình xây dựng</td>
+<td class="px-3 py-2 text-slate-500 italic">Trung bình</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="analysis-card">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Trạm 02</h2>
+<p class="text-xs text-slate-500 font-medium">Khu Sản Xuất</p>
+</div>
+<span class="material-symbols-outlined text-primary">factory</span>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Chỉ số trung bình từ nguồn phát thải</p>
+<div class="grid grid-cols-4 gap-2">
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">PM1.0</span>
+<span class="text-lg font-bold">32</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">PM2.5</span>
+<span class="text-lg font-bold">48</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">PM10</span>
+<span class="text-lg font-bold">92</span>
+</div>
+<div class="metric-box border-l-2 border-l-primary">
+<span class="text-[9px] font-bold text-primary uppercase">TVOC</span>
+<span class="text-lg font-bold">1.45</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">CO</span>
+<span class="text-lg font-bold">2.4</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">CO2</span>
+<span class="text-lg font-bold">580</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">NO2</span>
+<span class="text-lg font-bold">0.15</span>
+</div>
+</div>
+<p class="text-[9px] text-slate-500 mt-3 leading-tight italic">Các giá trị trên thể hiện mức độ đóng góp trung bình từ các nguồn ô nhiễm được phân tích</p>
+</div>
+<div>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Nguồn ô nhiễm ảnh hưởng</p>
+<div class="space-y-4">
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-bold uppercase">
+<span>Công nghiệp</span>
+<span>65%</span>
+</div>
+<div class="source-bar-bg"><div class="source-bar-fill bg-quality-moderate" style="width: 65%"></div></div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-bold uppercase">
+<span>Giao thông</span>
+<span>15%</span>
+</div>
+<div class="source-bar-bg"><div class="source-bar-fill bg-quality-moderate opacity-70" style="width: 15%"></div></div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-bold uppercase">
+<span>Bụi đường</span>
+<span>15%</span>
+</div>
+<div class="source-bar-bg"><div class="source-bar-fill bg-quality-moderate opacity-50" style="width: 15%"></div></div>
+</div>
+</div>
+</div>
+<div class="mt-auto">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tóm tắt nguồn chính</p>
+<div class="overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800">
+<table class="w-full text-left text-xs">
+<thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 uppercase font-bold">
+<tr>
+<th class="px-3 py-2">Nguồn</th>
+<th class="px-3 py-2">Tác động</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr>
+<td class="px-3 py-2 font-medium">Lò hơi công nghiệp</td>
+<td class="px-3 py-2 text-slate-500 italic">Rất cao</td>
+</tr>
+<tr>
+<td class="px-3 py-2 font-medium">Khí thải hóa chất</td>
+<td class="px-3 py-2 text-slate-500 italic">Cao</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="analysis-card">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Trạm 03</h2>
+<p class="text-xs text-slate-500 font-medium">Kho Hóa Chất</p>
+</div>
+<span class="material-symbols-outlined text-primary">warehouse</span>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Chỉ số trung bình từ nguồn phát thải</p>
+<div class="grid grid-cols-4 gap-2">
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">PM1.0</span>
+<span class="text-lg font-bold">65</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">PM2.5</span>
+<span class="text-lg font-bold">110</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">PM10</span>
+<span class="text-lg font-bold">205</span>
+</div>
+<div class="metric-box border-l-2 border-l-primary">
+<span class="text-[9px] font-bold text-primary uppercase">TVOC</span>
+<span class="text-lg font-bold">4.82</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">CO</span>
+<span class="text-lg font-bold">4.2</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">CO2</span>
+<span class="text-lg font-bold">850</span>
+</div>
+<div class="metric-box">
+<span class="text-[9px] font-bold text-slate-400 uppercase">NO2</span>
+<span class="text-lg font-bold">0.45</span>
+</div>
+</div>
+<p class="text-[9px] text-slate-500 mt-3 leading-tight italic">Các giá trị trên thể hiện mức độ đóng góp trung bình từ các nguồn ô nhiễm được phân tích</p>
+</div>
+<div>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Nguồn ô nhiễm ảnh hưởng</p>
+<div class="space-y-4">
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-bold uppercase">
+<span>Công nghiệp</span>
+<span>55%</span>
+</div>
+<div class="source-bar-bg"><div class="source-bar-fill bg-quality-poor" style="width: 55%"></div></div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-bold uppercase">
+<span>Đốt rác</span>
+<span>30%</span>
+</div>
+<div class="source-bar-bg"><div class="source-bar-fill bg-quality-poor opacity-70" style="width: 30%"></div></div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-bold uppercase">
+<span>Giao thông</span>
+<span>10%</span>
+</div>
+<div class="source-bar-bg"><div class="source-bar-fill bg-quality-poor opacity-50" style="width: 10%"></div></div>
+</div>
+</div>
+</div>
+<div class="mt-auto">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tóm tắt nguồn chính</p>
+<div class="overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800">
+<table class="w-full text-left text-xs">
+<thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 uppercase font-bold">
+<tr>
+<th class="px-3 py-2">Nguồn</th>
+<th class="px-3 py-2">Tác động</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr>
+<td class="px-3 py-2 font-medium">Dung môi bay hơi</td>
+<td class="px-3 py-2 text-slate-500 italic">Nguy kịch</td>
+</tr>
+<tr>
+<td class="px-3 py-2 font-medium">Rác thải tập trung</td>
+<td class="px-3 py-2 text-slate-500 italic">Rất cao</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="flex-none bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-8 py-3 flex justify-between items-center">
+<div class="flex gap-8 items-center">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Trạng thái hệ thống:</span>
+<span class="text-[10px] font-bold text-quality-good flex items-center gap-1">
+<span class="size-1.5 rounded-full bg-quality-good animate-pulse"></span> Đang hoạt động ổn định
+                </span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cập nhật:</span>
+<span class="text-[10px] font-bold text-slate-600 dark:text-slate-300">14:25:30 - 21/05/2024</span>
+</div>
+</div>
+<div class="text-[10px] text-slate-400 font-medium italic uppercase tracking-tight">
+            * Dữ liệu phân tích dựa trên thuật toán học máy và cảm biến thời gian thực
+        </div>
+</footer>
+</div>
+
+</body></html>

@@ -1,0 +1,441 @@
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dự Báo Đầy Đủ Thông Số Môi Trường</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "quality-good": "#10b981",
+                        "quality-moderate": "#f59e0b",
+                        "quality-poor": "#ef4444",
+                        "sidebar-bg": "#1e293b",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .forecast-card {
+                @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md transition-all p-6;
+            }
+            .metric-row {
+                @apply flex items-center justify-between py-2.5 border-b border-slate-100 dark:border-slate-800 last:border-0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-hidden h-screen flex">
+<aside class="w-64 bg-white dark:bg-sidebar-bg flex-none flex flex-col border-r border-slate-200 dark:border-slate-800 transition-colors duration-200">
+    <div class="p-5 flex items-center gap-3">
+        <div class="bg-primary rounded-lg p-1.5 text-white flex items-center justify-center"><span class="material-symbols-outlined text-2xl">air</span></div>
+        <span class="text-slate-800 dark:text-white font-bold text-lg tracking-tight uppercase">Air Monitor</span>
+    </div>
+    
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="main.html">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">home</span>
+            <span class="font-medium">Tổng quan</span>
+        </a>
+       
+      
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all text-sm" href="#">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">partly_cloudy_day</span>
+            <span class="font-medium">Dự báo</span>
+        </a>
+         <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="analysis.html">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">analytics</span>
+            <span class="font-medium">Phân tích</span>
+        </a>
+          <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="history.html">
+             <span class="material-symbols-outlined text-xl">history</span>
+            <span>Lịch sử trạm</span>
+        </a>
+        
+    </nav>
+</aside>
+
+<div class="flex-1 flex flex-col overflow-hidden">
+<header class="flex-none z-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 py-4">
+<div>
+<h1 class="text-2xl font-bold leading-tight">Dự báo chất lượng không khí &amp; môi trường ngày mai</h1>
+<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Xu hướng và dự báo quan trắc 24 giờ tới</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-500 text-sm">calendar_today</span>
+<span class="text-xs font-semibold">21/05/2024</span>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-8 no-scrollbar">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+<div class="forecast-card flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Trạm 01</h2>
+<p class="text-xs text-slate-500">Khu vực Sảnh Chính</p>
+</div>
+<div class="bg-quality-good/10 text-quality-good px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                        Độ tin cậy: 94%
+                    </div>
+</div>
+<div class="flex-1 space-y-0.5">
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">Nhiệt độ</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">28.5 <span class="text-[10px] font-normal text-slate-400">°C</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">1.5°</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">Độ ẩm</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">65 <span class="text-[10px] font-normal text-slate-400">%</span></span>
+<div class="flex items-center text-quality-good">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+<span class="text-[11px] font-bold">2%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">PM 1.0</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">10.5 <span class="text-[10px] font-normal text-slate-400 lowercase">µg/m³</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">5%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">PM 2.5</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">15.2 <span class="text-[10px] font-normal text-slate-400 lowercase">µg/m³</span></span>
+<div class="flex items-center text-quality-good">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+<span class="text-[11px] font-bold">3%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">PM 10</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">22.4 <span class="text-[10px] font-normal text-slate-400 lowercase">µg/m³</span></span>
+<div class="flex items-center text-quality-good">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+<span class="text-[11px] font-bold">8%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">CO</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">0.45 <span class="text-[10px] font-normal text-slate-400 lowercase">ppm</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">1%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">CO2</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">425 <span class="text-[10px] font-normal text-slate-400 lowercase">ppm</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">12ppm</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">NO2</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">18 <span class="text-[10px] font-normal text-slate-400 lowercase">ppb</span></span>
+<div class="flex items-center text-quality-good">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+<span class="text-[11px] font-bold">2%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">TVOC</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">135 <span class="text-[10px] font-normal text-slate-400 lowercase">ppb</span></span>
+<div class="flex items-center text-quality-good">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+<span class="text-[11px] font-bold">15ppb</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="bg-quality-good/10 text-quality-good p-3 rounded-xl flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+<span class="font-bold text-sm">Dự báo: Tốt</span>
+</div>
+</div>
+</div>
+<div class="forecast-card flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Trạm 02</h2>
+<p class="text-xs text-slate-500">Khu Sản Xuất</p>
+</div>
+<div class="bg-quality-moderate/10 text-quality-moderate px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                        Độ tin cậy: 89%
+                    </div>
+</div>
+<div class="flex-1 space-y-0.5">
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">Nhiệt độ</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">32.1 <span class="text-[10px] font-normal text-slate-400">°C</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">2.4°</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">Độ ẩm</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">58 <span class="text-[10px] font-normal text-slate-400">%</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">5%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">PM 1.0</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">28.4 <span class="text-[10px] font-normal text-slate-400 lowercase">µg/m³</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">15%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">PM 2.5</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">42.1 <span class="text-[10px] font-normal text-slate-400 lowercase">µg/m³</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">10%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">PM 10</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">65.8 <span class="text-[10px] font-normal text-slate-400 lowercase">µg/m³</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">5%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">CO</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">1.2 <span class="text-[10px] font-normal text-slate-400 lowercase">ppm</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">0.2</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">CO2</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">890 <span class="text-[10px] font-normal text-slate-400 lowercase">ppm</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">45ppm</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">NO2</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">35 <span class="text-[10px] font-normal text-slate-400 lowercase">ppb</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">4%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">TVOC</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">520 <span class="text-[10px] font-normal text-slate-400 lowercase">ppb</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">70ppb</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="bg-quality-moderate/10 text-quality-moderate p-3 rounded-xl flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">warning</span>
+<span class="font-bold text-sm">Dự báo: Trung bình</span>
+</div>
+</div>
+</div>
+<div class="forecast-card flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Trạm 03</h2>
+<p class="text-xs text-slate-500">Kho Hóa Chất</p>
+</div>
+<div class="bg-quality-poor/10 text-quality-poor px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                        Độ tin cậy: 82%
+                    </div>
+</div>
+<div class="flex-1 space-y-0.5">
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">Nhiệt độ</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">34.8 <span class="text-[10px] font-normal text-slate-400">°C</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">3.1°</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">Độ ẩm</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">78 <span class="text-[10px] font-normal text-slate-400">%</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">12%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">PM 1.0</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">65.2 <span class="text-[10px] font-normal text-slate-400 lowercase">µg/m³</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">22%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">PM 2.5</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">88.5 <span class="text-[10px] font-normal text-slate-400 lowercase">µg/m³</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">18%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">PM 10</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">132.0 <span class="text-[10px] font-normal text-slate-400 lowercase">µg/m³</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">25%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">CO</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">4.2 <span class="text-[10px] font-normal text-slate-400 lowercase">ppm</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">1.2</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">CO2</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">1450 <span class="text-[10px] font-normal text-slate-400 lowercase">ppm</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">200ppm</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">NO2</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">92 <span class="text-[10px] font-normal text-slate-400 lowercase">ppb</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">12%</span>
+</div>
+</div>
+</div>
+<div class="metric-row">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">TVOC</span>
+<div class="flex items-center gap-3">
+<span class="text-base font-bold">2100 <span class="text-[10px] font-normal text-slate-400 lowercase">ppb</span></span>
+<div class="flex items-center text-quality-poor">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-[11px] font-bold">400ppb</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="bg-quality-poor/10 text-quality-poor p-3 rounded-xl flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">error</span>
+<span class="font-bold text-sm">Dự báo: Có nguy cơ ô nhiễm</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="flex-none bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-8 py-3 flex justify-between items-center">
+<div class="flex gap-8 items-center">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mô hình dự báo:</span>
+<span class="text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="size-1.5 rounded-full bg-primary"></span> LSTM-Neural Network v4
+                </span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lần cập nhật cuối:</span>
+<span class="text-[10px] font-bold text-slate-600 dark:text-slate-300">14:00:00 - 20/05/2024</span>
+</div>
+</div>
+<div class="text-[10px] text-slate-400 font-medium italic uppercase tracking-tight">
+            * Các số liệu dự báo mang tính chất tham khảo dựa trên dữ liệu lịch sử
+        </div>
+</footer>
+</div>
+
+</body></html>

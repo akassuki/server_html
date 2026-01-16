@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lịch Sử Dữ Liệu Trạm Đo Air Monitor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#137fec",
+                    "background-light": "#f8fafc",
+                    "background-dark": "#0f172a",
+                    "quality-good": "#10b981",
+                    "quality-moderate": "#f59e0b",
+                    "quality-poor": "#ef4444",
+                    "sidebar-bg": "#1e293b", // Giữ lại cho Dark mode
+                },
+                fontFamily: { "display": ["Space Grotesk"] },
+            },
+        },
+    }
+</script>
+<style type="text/tailwindcss">
+    @layer utilities {
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .status-indicator { @apply size-1 rounded-full inline-block mr-1; }
+        .dense-table th, .dense-table td { @apply py-1.5 px-3 leading-tight; }
+    }
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-hidden h-screen flex">
+
+<aside class="w-64 bg-white dark:bg-sidebar-bg flex-none flex flex-col border-r border-slate-200 dark:border-slate-800 transition-colors duration-200">
+    <div class="p-5 flex items-center gap-3">
+        <div class="bg-primary rounded-lg p-1.5 text-white flex items-center justify-center"><span class="material-symbols-outlined text-2xl">air</span></div>
+        <span class="text-slate-800 dark:text-white font-bold text-lg tracking-tight uppercase">Air Monitor</span>
+    </div>
+    
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="main.html">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">home</span>
+            <span class="font-medium">Tổng quan</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="forecast.html">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">partly_cloudy_day</span>
+            <span class="font-medium">Dự báo</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm group" href="analysis.html">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">analytics</span>
+            <span class="font-medium">Phân tích</span>
+        </a>
+        
+        <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all text-sm" href="#">
+            <span class="material-symbols-outlined text-xl">history</span>
+            <span>Lịch sử trạm</span>
+        </a>
+    </nav>
+</aside>
+
+<div class="flex-1 flex flex-col overflow-hidden">
+    <header class="flex-none z-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-2.5">
+        <div><h1 class="text-lg font-bold leading-tight">Lịch sử dữ liệu trạm đo</h1><p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Tra cứu dữ liệu quan trắc chi tiết</p></div>
+    </header>
+
+    <main class="flex-1 overflow-hidden flex flex-col p-4 gap-3">
+        <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col gap-0.5">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Chọn Trạm</label>
+                    <select id="filter-node" onchange="loadHistory(1)" class="form-select py-1 text-xs font-semibold rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-primary focus:border-primary min-w-[160px]">
+                        <option value="NODE_01">Trạm 01 (NODE_1)</option>
+                        <option value="NODE_02">Trạm 02 (NODE_2)</option>
+                        <option value="NODE_03">Trạm 03 (NODE_3)</option>
+                    </select>
+                </div>
+                </div>
+            <div class="flex items-end">
+                <button onclick="exportData()" class="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg text-[11px] font-bold hover:bg-primary/90 transition-all shadow-md shadow-primary/20">
+                    <span class="material-symbols-outlined text-base">download</span><span>Xuất báo cáo</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+            <div class="overflow-x-auto overflow-y-auto no-scrollbar flex-1">
+                <table class="w-full text-left border-collapse dense-table">
+                    <thead class="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
+                        <tr>
+                            <th class="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Thời gian</th>
+                            <th class="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">PM 1.0</th>
+                            <th class="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">PM 2.5</th>
+                            <th class="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">PM 10</th>
+                            <th class="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">CO</th>
+                            <th class="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">CO2</th>
+                            <th class="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">NO2</th>
+                            <th class="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">TVOC</th>
+                            <th class="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Nhiệt độ</th>
+                            <th class="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Độ ẩm</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="px-6 py-2 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <p id="pagination-info" class="text-[10px] text-slate-500 font-medium">Đang tải...</p>
+                <div class="flex items-center gap-1.5" id="pagination-controls"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const API_BASE = "http://127.0.0.1:3000/api/history";
+    let currentPage = 1;
+    const limit = 30;
+
+    const THRESHOLDS = {
+        pm1: { moderate: 35, poor: 75 },
+        pm25: { moderate: 35, poor: 75 },
+        pm10: { moderate: 50, poor: 150 },
+        co: { moderate: 10, poor: 30 },
+        co2: { moderate: 1000, poor: 2000 },
+        no2: { moderate: 100, poor: 200 },
+        tvoc: { moderate: 200, poor: 600 }
+    };
+
+    function getColorClass(key, value) {
+        if (value === null || value === undefined) return "text-slate-400";
+        let tKey = key;
+        if (key === 'voc') tKey = 'tvoc';
+        
+        const rule = THRESHOLDS[tKey];
+        if (!rule) return "text-slate-700 dark:text-slate-300"; 
+
+        if (value >= rule.poor) return "text-quality-poor";
+        if (value >= rule.moderate) return "text-quality-moderate";
+        return "text-quality-good";
+    }
+
+    function getBgClass(key, value) {
+        const textClass = getColorClass(key, value);
+        return textClass.replace("text-", "bg-");
+    }
+
+    async function loadHistory(page = 1) {
+        currentPage = page;
+        const node = document.getElementById('filter-node').value;
+        let url = `${API_BASE}?node=${node}&page=${page}&limit=${limit}`;
+
+        try {
+            const res = await fetch(url);
+            const json = await res.json();
+            renderTable(json.data);
+            renderPagination(json.pagination);
+        } catch (e) {
+            console.error("Lỗi tải lịch sử:", e);
+        }
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('history-table-body');
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-xs text-slate-500">Không có dữ liệu</td></tr>`;
+            return;
+        }
+
+        data.forEach(row => {
+            const time = new Date(row.timestamp).toLocaleString('vi-VN', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit', 
+                day: '2-digit', 
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const cell = (key, val, unit) => {
+                const color = getColorClass(key, val);
+                const bg = getBgClass(key, val);
+                const isPollutant = THRESHOLDS[key] || THRESHOLDS[key === 'voc' ? 'tvoc' : ''];
+                
+                let indicator = "";
+                if (isPollutant && val !== null) {
+                    indicator = `<span class="status-indicator ${bg}"></span>`;
+                }
+                return `<td class="text-[11px] font-bold ${color} whitespace-nowrap">${indicator}${val ?? '--'}</td>`;
+            };
+
+            const tr = `
+                <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-50 dark:border-slate-800/50">
+                    <td class="text-[11px] font-semibold text-slate-500 whitespace-nowrap">${time}</td>
+                    ${cell('pm1', row.pm1)}
+                    ${cell('pm25', row.pm25)}
+                    ${cell('pm10', row.pm10)}
+                    ${cell('co', row.co)}
+                    ${cell('co2', row.co2)}
+                    ${cell('no2', row.no2)}
+                    ${cell('voc', row.tvoc)}
+                    ${cell('temperature', row.temperature)}
+                    ${cell('humidity', row.humidity)}
+                </tr>
+            `;
+            tbody.innerHTML += tr;
+        });
+    }
+
+    function renderPagination(p) {
+        const info = document.getElementById('pagination-info');
+        const start = (p.page - 1) * p.limit + 1;
+        const end = Math.min(p.page * p.limit, p.total);
+        info.innerHTML = `Hiển thị <span class="font-bold">${start} - ${end}</span> trong số <span class="font-bold">${p.total}</span> bản ghi`;
+
+        const controls = document.getElementById('pagination-controls');
+        controls.innerHTML = "";
+
+        const prevDisabled = p.page === 1 ? 'opacity-50 pointer-events-none' : '';
+        controls.innerHTML += `
+            <button onclick="loadHistory(${p.page - 1})" class="${prevDisabled} size-7 rounded border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                <span class="material-symbols-outlined text-sm">chevron_left</span>
+            </button>
+        `;
+
+        let pages = [];
+        if (p.total_pages <= 5) {
+            for(let i=1; i<=p.total_pages; i++) pages.push(i);
+        } else {
+            if (p.page <= 3) pages = [1,2,3,4, '...'];
+            else if (p.page >= p.total_pages - 2) pages = ['...', p.total_pages-3, p.total_pages-2, p.total_pages-1, p.total_pages];
+            else pages = ['...', p.page-1, p.page, p.page+1, '...'];
+        }
+
+        pages.forEach(pg => {
+            if (pg === '...') {
+                controls.innerHTML += `<span class="text-slate-400 text-[10px]">...</span>`;
+            } else {
+                const active = pg === p.page ? 'bg-primary text-white border-primary' : 'border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800';
+                controls.innerHTML += `<button onclick="loadHistory(${pg})" class="size-7 rounded border ${active} flex items-center justify-center text-[10px] font-bold transition-colors">${pg}</button>`;
+            }
+        });
+
+        const nextDisabled = p.page === p.total_pages || p.total === 0 ? 'opacity-50 pointer-events-none' : '';
+        controls.innerHTML += `
+            <button onclick="loadHistory(${p.page + 1})" class="${nextDisabled} size-7 rounded border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+        `;
+    }
+
+    function exportData() {
+        const node = document.getElementById('filter-node').value;
+        const exportUrl = `${API_BASE.replace('/history', '/export')}?node=${node}`;
+        window.location.href = exportUrl;
+    }
+
+    loadHistory(1);
+</script>
+</body>
+</html>
