@@ -7,12 +7,13 @@ import threading
 import schedule
 import time
 import json
-import torch
+#import torch
 import pandas as pd
 import numpy as np
 from config import *
 from services.db_service import * 
-from services.train_service import *
+#from services.train_service import *
+from services.train_service_tenser import *
 from services.cluster_service import *
 from utils.helpers import *
 from flask.json.provider import DefaultJSONProvider
@@ -226,8 +227,8 @@ def daily_task():
 
 
 
-schedule.every().day.at(f"{DAILY_TRAIN_HOUR:02d}:{DAILY_TRAIN_MINUTE:02d}").do(daily_task)
-#schedule.every(1).minutes.do(daily_task)
+#schedule.every().day.at(f"{DAILY_TRAIN_HOUR:02d}:{DAILY_TRAIN_MINUTE:02d}").do(daily_task)
+schedule.every(1).minutes.do(daily_task)
 
 
 def run_scheduler():

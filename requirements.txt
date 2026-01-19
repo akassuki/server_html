@@ -2,8 +2,10 @@ flask==3.0.3
 pandas==2.2.3
 numpy==2.0.2
 scikit-learn==1.6.0
-torch==2.5.1
+#torch==2.5.1
 schedule==1.2.2
 python-dateutil
 # pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu ( nếu không thể  tải thư viện torch )
 requests==2.32.5
+# pip install tensorflow-aarch64
+# keras
