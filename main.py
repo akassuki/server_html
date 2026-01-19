@@ -18,6 +18,21 @@ from services.cluster_service import *
 from utils.helpers import *
 from flask.json.provider import DefaultJSONProvider
 from flask import Flask, request, jsonify, Response
+import socket
+
+
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('8.8.8.8', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
+app = Flask(__name__)
 
 # === TẠO THƯ MỤC LOGS ===
 os.makedirs(LOG_DIR, exist_ok=True)
@@ -394,6 +409,7 @@ def status():
 
 if __name__ == '__main__':
     logger.info("=== AIR QUALITY SERVER KHỞI ĐỘNG ===")
+    local_ip = get_local_ip()
     logger.info(f"Truy cập: http://<IP-của-máy>:{PORT}")
     logger.info("LƯU Ý: Khi server tắt hoặc reset, TOÀN BỘ dữ liệu sẽ bị xóa hết")
     app.run(host='0.0.0.0', port=PORT, debug=False, use_reloader=False)
