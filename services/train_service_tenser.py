@@ -3,8 +3,8 @@ import numpy as np
 from datetime import datetime, timedelta
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
+from keras.models import Sequential
+from keras.layers import LSTM, Dense
 from config import LOOK_BACK, LSTM_EPOCHS, LSTM_HIDDEN_SIZE, LSTM_NUM_LAYERS, MIN_TRAIN_POINTS
 from utils.helpers import extract_numeric_values_and_keys
 from services.db_service import get_connection

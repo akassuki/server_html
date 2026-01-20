@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify , render_template , send_from_directory
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import logging
@@ -32,7 +32,6 @@ def get_local_ip():
         s.close()
     return IP
 
-app = Flask(__name__)
 
 # === TẠO THƯ MỤC LOGS ===
 os.makedirs(LOG_DIR, exist_ok=True)
@@ -91,7 +90,7 @@ thread_logger.addHandler(thread_file_handler)
 
 logger.info("=== BẮT ĐẦU CONFIG SERVER ===")
 
-app = Flask(__name__)
+app = Flask(__name__,template_folder='html',static_folder="html",static_url_path="")
 
 CORS(app)
 
@@ -264,7 +263,7 @@ scheduler_thread.start()
 
 @app.route('/')
 def home():
-    return "Air Quality Server đang chạy!<br>POST dữ liệu tại /api/data"
+    return render_template('main.html')
 
 @app.route('/api/data', methods=['POST'])
 def receive_data():
@@ -407,9 +406,12 @@ def status():
         "note": "Dữ liệu sẽ bị xóa hoàn toàn khi server reset hoặc tắt"
     })
 
+@app.route("/<path:path>")
+def catch_all(path):
+    return send_from_directory(app.static_folder,"main.html")
+
 if __name__ == '__main__':
     logger.info("=== AIR QUALITY SERVER KHỞI ĐỘNG ===")
-    local_ip = get_local_ip()
     logger.info(f"Truy cập: http://<IP-của-máy>:{PORT}")
     logger.info("LƯU Ý: Khi server tắt hoặc reset, TOÀN BỘ dữ liệu sẽ bị xóa hết")
     app.run(host='0.0.0.0', port=PORT, debug=False, use_reloader=False)
